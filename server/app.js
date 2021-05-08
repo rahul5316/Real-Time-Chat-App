@@ -5,18 +5,42 @@
 //socket.io => socket implemented
 
 const express = require("express");
+const { Server } = require("socket.io");
+//server is created
 
 const app = express();
+const http = require('http');
+const server = http.createServer(app);
 
-app.use(express.json());
+const io = new Server(server);
+
+
+
+//app.use(express.json());
+app.use(express.static("public"));// the public file is now static that means the client can now see that file and it can be used anywhere. static files never change
 
 //get method on path "/". It receives two object:request and response
-app.get("/", function(req, response){
+// app.get("/home", function(req, response){
+
+const userList  = [];
 
 
-  console.log(request);
+//   console.log(req);
+//   response.send("Welcome to the homepage!!")
+// })
 
+io.on("connection", function(socket){
+  console.log(socket.id+ "connected!!");
+  // console.log(socket);
 
+   socket.on("userConnected", function(username){
+     let userObject = {id: socket.id, username:username};
+     userList.push(userObject);
+     console.log(userList);
+//broadcast a message to all other clients except sender
+     socket.broadcast.emit("join",username);
+
+   })
 })
 
 //server is created from the above two lines.
@@ -27,3 +51,8 @@ app.get("/", function(req, response){
 app.listen(5500, function() {
   console.log("Server started at port 5500");
 })
+
+//socket.emit is used to send data where socket is connecte
+
+
+
